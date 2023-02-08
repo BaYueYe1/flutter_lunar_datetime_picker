@@ -159,6 +159,8 @@ class _DatePickerState extends State<_DatePickerComponent> {
 
   late BasePickerModel pickerModel;
 
+  // TextEditingController textEditingController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -175,6 +177,14 @@ class _DatePickerState extends State<_DatePickerComponent> {
           maxTime: widget.dateInitTime?.maxTime,
           minTime: widget.dateInitTime?.minTime);
     }
+
+    // _controllerAddListener() {
+    //   textEditingController.addListener(() {
+    //     name = textEditingController.text;
+    //     setState(() {});
+    //   });
+    // }
+
     refreshScrollOffset();
   }
 
@@ -223,8 +233,10 @@ class _DatePickerState extends State<_DatePickerComponent> {
   @override
   Widget build(BuildContext context) {
     DatePickerTheme theme = widget.route.theme;
-    return GestureDetector(
-      child: AnimatedBuilder(
+    return Scaffold(
+      backgroundColor: Colors.black12,
+      resizeToAvoidBottomInset: true,
+      body: AnimatedBuilder(
         animation: widget.route.animation!,
         builder: (BuildContext context, Widget? child) {
           final double bottomPadding = MediaQuery.of(context).padding.bottom;
@@ -264,13 +276,21 @@ class _DatePickerState extends State<_DatePickerComponent> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                const SizedBox(
+                SizedBox(
                   height: 40,
-                  width: 150,
+                  width: 200,
                   child: TextField(
+                    // controller: textEditingController,
+                    onChanged: (value) {
+                      name = value;
+                      setState(() {});
+                    },
                     textAlign: TextAlign.left,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       hintText: '请输入名字',
+                      hintStyle: TextStyle(
+                        color: Colors.black12,
+                      ),
                     ),
                   ),
                 ),
