@@ -6,7 +6,8 @@ import 'package:flutter_lunar_datetime_picker/date_init.dart';
 import 'package:flutter_lunar_datetime_picker/date_model.dart';
 import 'package:flutter_lunar_datetime_picker/datetime_picker_theme.dart';
 
-typedef DateChangedCallback = Function(DateTime time, bool lunar);
+typedef DateChangedCallback = Function(
+    DateTime time, bool lunar, String name, String gender);
 typedef DateCancelledCallback = Function();
 typedef StringAtIndexCallBack = String? Function(int index);
 
@@ -25,6 +26,7 @@ class DatePicker {
     DateTime? currentTime,
     DatePickerTheme? theme,
     bool? lunarPicker,
+    bool? nameAndGenderPicker,
     DateInitTime? dateInitTime,
     bool? showTime,
   }) async {
@@ -37,6 +39,7 @@ class DatePicker {
         onCancel: onCancel,
         theme: theme,
         lunarPicker: lunarPicker,
+        nameAndGenderPicker: nameAndGenderPicker,
         dateInitTime: dateInitTime,
         barrierLabel:
             MaterialLocalizations.of(context).modalBarrierDismissLabel,
@@ -53,6 +56,7 @@ class _DatePickerRoute<T> extends PopupRoute<T> {
     this.onConfirm,
     this.onCancel,
     this.lunarPicker,
+    this.nameAndGenderPicker,
     DatePickerTheme? theme,
     this.dateInitTime,
     this.barrierLabel,
@@ -67,6 +71,7 @@ class _DatePickerRoute<T> extends PopupRoute<T> {
   final DateCancelledCallback? onCancel;
   final DatePickerTheme theme;
   final bool? lunarPicker;
+  final bool? nameAndGenderPicker;
   final DateInitTime? dateInitTime;
   final bool? showTime;
 
@@ -102,6 +107,7 @@ class _DatePickerRoute<T> extends PopupRoute<T> {
         onChanged: onChanged,
         route: this,
         lunarPicker: lunarPicker ?? false,
+        nameAndGenderPicker: nameAndGenderPicker ?? false,
         dateInitTime: dateInitTime,
         showTime: showTime,
       ),
@@ -116,6 +122,7 @@ class _DatePickerComponent extends StatefulWidget {
     required this.route,
     this.onChanged,
     required this.lunarPicker,
+    required this.nameAndGenderPicker,
     required this.dateInitTime,
     required this.showTime,
   }) : super(key: key);
@@ -125,6 +132,7 @@ class _DatePickerComponent extends StatefulWidget {
   final _DatePickerRoute route;
 
   final bool lunarPicker;
+  final bool nameAndGenderPicker;
 
   final DateInitTime? dateInitTime;
 
@@ -144,6 +152,10 @@ class _DatePickerState extends State<_DatePickerComponent> {
       minuteScrollCtrl;
 
   bool lunarPicker = false;
+
+  String gender = '男';
+
+  String name = '名字1';
 
   late BasePickerModel pickerModel;
 
@@ -222,6 +234,7 @@ class _DatePickerState extends State<_DatePickerComponent> {
                 widget.route.animation!.value,
                 theme,
                 showTitleActions: widget.route.showTitleActions!,
+                showNameAndGenderActions: widget.nameAndGenderPicker,
                 bottomPadding: bottomPadding,
               ),
               child: GestureDetector(
@@ -239,42 +252,60 @@ class _DatePickerState extends State<_DatePickerComponent> {
 
   void _notifyDateChanged() {
     if (widget.onChanged != null) {
-      widget.onChanged!(pickerModel.finalTime()!, lunarPicker);
+      widget.onChanged!(pickerModel.finalTime()!, lunarPicker, name, gender);
     }
   }
 
   Widget _nameAndGenderView(DatePickerTheme theme) {
-    return Container(
-      height: theme.titleHeight,
-      alignment: Alignment.center,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          const SizedBox(
-            height: 40,
-            width: 150,
-            child: TextField(
-              textAlign: TextAlign.left,
-              decoration: InputDecoration(
-                hintText: '请输入名字',
-              ),
+    return (widget.nameAndGenderPicker
+        ? Container(
+            height: theme.nameAndGenderHeight,
+            alignment: Alignment.center,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                const SizedBox(
+                  height: 40,
+                  width: 150,
+                  child: TextField(
+                    textAlign: TextAlign.left,
+                    decoration: InputDecoration(
+                      hintText: '请输入名字',
+                    ),
+                  ),
+                ),
+                Row(
+                  children: [
+                    const Text('男'),
+                    Radio(
+                      value: '男',
+                      activeColor: Colors.green,
+                      groupValue: gender,
+                      onChanged: (value) {
+                        gender = value as String;
+                        setState(() {});
+                      },
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    const Text('女'),
+                    Radio(
+                      value: '女',
+                      activeColor: Colors.green,
+                      groupValue: gender,
+                      onChanged: (value) {
+                        gender = value as String;
+                        setState(() {});
+                      },
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ),
-          const Text('男'),
-          Radio(
-            value: 1,
-            groupValue: 1,
-            onChanged: (value) {},
-          ),
-          const Text('女'),
-          Radio(
-            value: 2,
-            groupValue: 1,
-            onChanged: (value) {},
-          ),
-        ],
-      ),
-    );
+          )
+        : Container());
   }
 
   Widget _renderPickerView(DatePickerTheme theme) {
@@ -565,7 +596,7 @@ class _DatePickerState extends State<_DatePickerComponent> {
                 Navigator.pop(context, pickerModel.finalTime());
                 if (widget.route.onConfirm != null) {
                   widget.route.onConfirm!(
-                      pickerModel.finalTime()!, lunarPicker);
+                      pickerModel.finalTime()!, lunarPicker, name, gender);
                 }
               },
             ),
@@ -581,6 +612,7 @@ class _BottomPickerLayout extends SingleChildLayoutDelegate {
     this.progress,
     this.theme, {
     this.showTitleActions,
+    this.showNameAndGenderActions,
     this.bottomPadding = 0,
   });
 
@@ -588,6 +620,7 @@ class _BottomPickerLayout extends SingleChildLayoutDelegate {
 
   // final int? itemCount;
   final bool? showTitleActions;
+  final bool? showNameAndGenderActions;
   final DatePickerTheme theme;
   final double bottomPadding;
 
@@ -595,7 +628,11 @@ class _BottomPickerLayout extends SingleChildLayoutDelegate {
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
     double maxHeight = theme.containerHeight;
     if (showTitleActions == true) {
-      maxHeight += 2 * theme.titleHeight;
+      maxHeight += theme.titleHeight;
+    }
+
+    if (showNameAndGenderActions == true) {
+      maxHeight += theme.nameAndGenderHeight;
     }
 
     return BoxConstraints(
