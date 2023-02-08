@@ -185,7 +185,7 @@ class _DatePickerState extends State<_DatePickerComponent> {
   }
 
   void refreshScrollOffset() {
-   // debugPrint('refreshScrollOffset ${pickerModel.currentMiddleIndex()}');
+    // debugPrint('refreshScrollOffset ${pickerModel.currentMiddleIndex()}');
     leftScrollCtrl = FixedExtentScrollController(
         initialItem: pickerModel.currentLeftIndex());
     middleScrollCtrl = FixedExtentScrollController(
@@ -243,12 +243,47 @@ class _DatePickerState extends State<_DatePickerComponent> {
     }
   }
 
+  Widget _nameAndGenderView(DatePickerTheme theme) {
+    return Container(
+      height: theme.titleHeight,
+      alignment: Alignment.center,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          const SizedBox(
+            height: 40,
+            width: 150,
+            child: TextField(
+              textAlign: TextAlign.left,
+              decoration: InputDecoration(
+                hintText: '请输入名字',
+              ),
+            ),
+          ),
+          const Text('男'),
+          Radio(
+            value: 1,
+            groupValue: 1,
+            onChanged: (value) {},
+          ),
+          const Text('女'),
+          Radio(
+            value: 2,
+            groupValue: 1,
+            onChanged: (value) {},
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _renderPickerView(DatePickerTheme theme) {
     Widget itemView = _renderItemView(theme);
     if (widget.route.showTitleActions == true) {
       return Column(
         children: <Widget>[
           _renderTitleActionsView(theme),
+          _nameAndGenderView(theme),
           itemView,
         ],
       );
@@ -560,7 +595,7 @@ class _BottomPickerLayout extends SingleChildLayoutDelegate {
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
     double maxHeight = theme.containerHeight;
     if (showTitleActions == true) {
-      maxHeight += theme.titleHeight;
+      maxHeight += 2 * theme.titleHeight;
     }
 
     return BoxConstraints(
